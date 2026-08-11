@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conjugador YMF — Your Mexican Friend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0d0820;
+    --bg-1:#150f30;
+    --card:#1b1440;
+    --card-2:#211a4c;
+    --line:#332a66;
+    --magenta:#ff2fc4;
+    --magenta-soft:#ff2fc433;
+    --cyan:#22e8f5;
+    --cyan-soft:#22e8f533;
+    --text:#f3f0ff;
+    --text-dim:#b7aede;
+    --text-faint:#8579b8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 0%, #2a1a5c 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #0e2f4a 0%, transparent 40%),
+      var(--bg-0);
+    color:var(--text);
+    font-family:'DM Sans', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  h1,h2,h3,.brand{font-family:'Syne', sans-serif; font-weight:800;}
+
+  /* ---- Header ---- */
+  header{
+    padding:28px 20px 20px;
+    max-width:1000px;
+    margin:0 auto;
+  }
+  .brand-row{
+    display:flex; align-items:center; gap:12px; margin-bottom:6px;
+  }
+  .logo-dot{
+    width:14px; height:14px; border-radius:3px;
+    background:linear-gradient(135deg, var(--magenta), var(--cyan));
+    transform:rotate(45deg);
+    flex-shrink:0;
+  }
+  .brand{
+    font-size:15px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .brand b{color:var(--text); font-weight:800;}
+  h1{
+    font-size:clamp(28px,5vw,42px);
+    margin:6px 0 6px;
+    line-height:1.05;
+    background:linear-gradient(90deg, var(--text) 40%, var(--cyan) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .subtitle{color:var(--text-dim); font-size:15px; max-width:560px; line-height:1.5;}
+
+  /* ---- Search ---- */
+  .search-wrap{
+    max-width:1000px; margin:22px auto 0; padding:0 20px;
+  }
+  .search-box{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:6px;
+    display:flex;
+    gap:8px;
+    box-shadow:0 0 0 0 var(--magenta-soft);
+    transition:box-shadow .2s ease, border-color .2s ease;
+  }
+  .search-box:focus-within{
+    border-color:var(--magenta);
+    box-shadow:0 0 0 4px var(--magenta-soft);
+  }
+  .search-box input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--text);
+    font-family:'DM Sans', sans-serif;
+    font-size:17px;
+    padding:12px 14px;
+  }
+  .search-box input::placeholder{color:var(--text-faint);}
+  .search-box button{
+    background:linear-gradient(135deg, var(--magenta), #b021e8);
+    color:#fff;
+    border:none;
+    border-radius:11px;
+    padding:0 22px;
+    font-family:'DM Sans', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:transform .15s ease, filter .15s ease;
+  }
+  .search-box button:hover{filter:brightness(1.1); transform:translateY(-1px);}
+  .search-box button:active{transform:translateY(0);}
+
+  .suggestions{
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0; right:0;
+    background:var(--card-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    z-index:20;
+    box-shadow:0 18px 40px -12px rgba(0,0,0,.6);
+    display:none;
+    max-height:260px;
+    overflow-y:auto;
+  }
+  .suggestions.show{display:block;}
+  .suggestions button{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    padding:11px 16px;
+    font-family:'DM Sans', sans-serif;
+    font-size:15px;
+    cursor:pointer;
+    border-bottom:1px solid var(--line);
+  }
+  .suggestions button:last-child{border-bottom:none;}
+  .suggestions button:hover, .suggestions button.active{background:var(--magenta-soft); color:#fff;}
+  .suggestions button small{color:var(--text-faint); float:right;}
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;
+  }
+  .chip{
+    font-size:13px;
+    color:var(--text-dim);
+    background:var(--card);
+    border:1px solid var(--line);
+    padding:6px 12px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  .chip:hover{border-color:var(--cyan); color:var(--cyan);}
+
+  .error-msg{
+    max-width:1000px; margin:18px auto 0; padding:16px 20px;
+    color:#ffd7ea; background:#3a1130; border:1px solid #6b1f52;
+    border-radius:12px; font-size:15px; display:none;
+  }
+  .error-msg.show{display:block;}
+
+  /* ---- Result ---- */
+  main{max-width:1000px; margin:0 auto; padding:0 20px;}
+  .verb-head{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    margin:34px 0 6px;
+  }
+  .verb-head h2{font-size:30px; margin:0; text-transform:lowercase;}
+  .tag{
+    font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+    padding:4px 10px; border-radius:100px; font-weight:700;
+  }
+  .tag.reg{color:var(--cyan); background:var(--cyan-soft); border:1px solid #22e8f566;}
+  .tag.irr{color:var(--magenta); background:var(--magenta-soft); border:1px solid #ff2fc466;}
+
+  .impersonal{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    margin:18px 0 30px;
+  }
+  .impersonal .cell{background:var(--card); padding:14px 16px;}
+  .impersonal .cell .k{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin-bottom:4px;}
+  .impersonal .cell .v{font-size:17px; font-weight:700; color:var(--text);}
+
+  .section-title{
+    font-size:13px; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--cyan); margin:34px 0 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  @media (max-width:760px){ .grid{grid-template-columns:1fr;} .impersonal{grid-template-columns:1fr;} }
+
+  .tense-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  .tense-card .head{
+    background:linear-gradient(90deg, var(--magenta), #8b21e8);
+    color:#fff; font-weight:700; font-size:14.5px;
+    padding:12px 16px;
+  }
+  .tense-card .rows{padding:4px 0;}
+  .tense-card .row{
+    display:flex; justify-content:space-between; gap:10px;
+    padding:9px 16px; font-size:15px;
+    border-bottom:1px solid var(--line);
+  }
+  .tense-card .row:last-child{border-bottom:none;}
+  .tense-card .row .p{color:var(--text-faint); font-size:13px;}
+  .tense-card .row .f{font-weight:600; color:var(--text); text-align:right;}
+  .tense-card.imperativo .head{background:linear-gradient(90deg, var(--cyan), #1a7fe8); color:#08131c;}
+
+  footer{
+    max-width:1000px; margin:50px auto 0; padding:20px;
+    color:var(--text-faint); font-size:13px; text-align:center;
+  }
+  footer a{color:var(--cyan); text-decoration:none;}
+
+  .empty-state{
+    max-width:1000px; margin:40px auto; padding:30px 24px;
+    background:var(--card); border:1px dashed var(--line);
+    border-radius:16px; color:var(--text-dim); font-size:15px; text-align:center;
+  }
+
+  /* ---- Resaltado de irregularidad ---- */
+  .tense-card .f mark{
+    background:transparent;
+    color:var(--magenta);
+    font-weight:800;
+    padding:0;
+  }
+  .tense-card.imperativo .f mark{ color:#0a3a42; text-decoration:underline; }
+
+  /* ---- Traducciones ---- */
+  .translations{
+    display:flex; flex-wrap:wrap; gap:8px 10px;
+    margin:2px 0 4px;
+  }
+  .translations .tr-pill{
+    font-size:13px; color:var(--text-dim);
+    background:var(--card-2); border:1px solid var(--line);
+    padding:5px 11px; border-radius:100px;
+  }
+  .translations .tr-pill b{color:var(--cyan); font-weight:700; margin-right:5px; text-transform:uppercase; font-size:11px;}
+
+  /* ---- Filtro de tiempos ---- */
+  .tense-filter{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin:22px 0 6px;
+  }
+  .tense-filter button{
+    font-family:'DM Sans', sans-serif; font-size:13px; font-weight:700;
+    color:var(--text-dim); background:var(--card); border:1px solid var(--line);
+    padding:7px 14px; border-radius:100px; cursor:pointer; transition:.15s ease;
+  }
+  .tense-filter button:hover{border-color:var(--cyan);}
+  .tense-filter button.active{
+    background:linear-gradient(90deg, var(--magenta), #8b21e8);
+    border-color:transparent; color:#fff;
+  }
+
+  /* ---- Copiar ---- */
+  .copy-btn{
+    background:transparent; border:none; color:#fff; opacity:.75;
+    cursor:pointer; font-size:12px; font-family:'DM Sans', sans-serif;
+    padding:3px 8px; border-radius:6px; float:right;
+  }
+  .copy-btn:hover{opacity:1; background:rgba(255,255,255,.15);}
+  .tense-card .head{display:flex; justify-content:space-between; align-items:center;}
+
+  /* ---- Historial reciente ---- */
+  .recent-row{
+    max-width:1000px; margin:10px auto 0; padding:0 20px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .recent-row .lbl{font-size:12px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em;}
+
+  /* ---- Comparar ---- */
+  .compare-toggle{
+    background:transparent; border:none; color:var(--cyan);
+    font-family:'DM Sans', sans-serif; font-size:13.5px; font-weight:700;
+    cursor:pointer; padding:10px 4px 0; text-decoration:underline;
+  }
+  .compare-row{
+    display:none; gap:8px; margin-top:10px;
+    background:var(--card); border:1px solid var(--line); border-radius:16px; padding:6px;
+  }
+  .compare-row.show{display:flex;}
+  .compare-row input{
+    flex:1; background:transparent; border:none; outline:none; color:var(--text);
+    font-family:'DM Sans', sans-serif; font-size:15px; padding:10px 14px;
+  }
+  .compare-row button{
+    background:linear-gradient(135deg, var(--cyan), #1a7fe8); color:#08131c; border:none;
+    border-radius:9px; padding:0 18px; font-weight:700; cursor:pointer;
+  }
+  .compare-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px 26px;
+    margin-top:20px;
+  }
+  .compare-wrap .verb-panel .grid{grid-template-columns:1fr;}
+  .compare-wrap .verb-panel .impersonal{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:760px){ .compare-wrap{grid-template-columns:1fr;} }
+  .compare-wrap .verb-panel{
+    border-left:1px solid var(--line); padding-left:20px;
+  }
+  .compare-wrap .verb-panel:first-child{border-left:none; padding-left:0;}
+
+  @media print{
+    header .subtitle, .search-wrap, .recent-row, .tense-filter, footer, .compare-toggle{display:none !important;}
+    body{background:#fff; color:#111;}
+    .tense-card, .impersonal .cell{background:#f5f5f8; border-color:#ccc;}
+    .tense-card .head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .copy-btn{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div class="logo-dot"></div>
+    <div class="brand">your mexican <b>friend</b></div>
+  </div>
+  <h1>Conjugador de verbos</h1>
+  <p class="subtitle">Verbos regulares e irregulares en español mexicano — sin "vosotros", sin pretérito anterior ni futuro de subjuntivo. Solo lo que realmente se usa.</p>
+</header>
+
+<div class="search-wrap">
+  <form class="search-box" id="searchForm" autocomplete="off">
+    <input type="text" id="searchInput" placeholder="Escribe un verbo, ej. hablar, tener, pedir…" />
+    <div class="suggestions" id="suggestions"></div>
+    <button type="submit">Buscar</button>
+  </form>
+  <div class="chips" id="chips"></div>
+
+  <button type="button" class="compare-toggle" id="compareToggle">+ Comparar con otro verbo</button>
+  <form class="compare-row" id="compareForm" autocomplete="off">
+    <input type="text" id="compareInput" placeholder="Segundo verbo, ej. estar…" />
+    <button type="submit">Comparar</button>
+  </form>
+</div>
+
+<div class="recent-row" id="recentRow" style="display:none;">
+  <span class="lbl">Recientes:</span>
+  <div class="chips" id="recentChips"></div>
+</div>
+
+<div class="error-msg" id="errorMsg"></div>
+
+<div class="tense-filter" id="tenseFilter" style="display:none;">
+  <button type="button" class="active" data-filter="todos">Todos</button>
+  <button type="button" data-filter="indicativo">Indicativo</button>
+  <button type="button" data-filter="subjuntivo">Subjuntivo</button>
+  <button type="button" data-filter="imperativo">Imperativo</button>
+</div>
+
+<main id="result"></main>
+
+<footer>
+  Hecho para <a href="https://yourmexicanfriend.com" target="_blank" rel="noopener">yourmexicanfriend.com</a> · Español mexicano, sin vosotros.
+</footer>
+
+<script>
+/* =========================================================
+   MOTOR DE CONJUGACIÓN
+   ========================================================= */
+const FUT_END  = ["é","ás","á","emos","án"];
+const COND_END = ["ía","ías","ía","íamos","ían"];
+
+const REG = {
+  ar: { pres:["o","as","a","amos","an"], impf:["aba","abas","aba","ábamos","aban"],
+        pret:["é","aste","ó","amos","aron"], subjPres:["e","es","e","emos","en"],
+        subjImpf1:["ara","aras","ara","áramos","aran"], subjImpf2:["ase","ases","ase","ásemos","asen"],
+        ger:"ando", part:"ado" },
+  er: { pres:["o","es","e","emos","en"], impf:["ía","ías","ía","íamos","ían"],
+        pret:["í","iste","ió","imos","ieron"], subjPres:["a","as","a","amos","an"],
+        subjImpf1:["iera","ieras","iera","iéramos","ieran"], subjImpf2:["iese","ieses","iese","iésemos","iesen"],
+        ger:"iendo", part:"ido" },
+  ir: { pres:["o","es","e","imos","en"], impf:["ía","ías","ía","íamos","ían"],
+        pret:["í","iste","ió","imos","ieron"], subjPres:["a","as","a","amos","an"],
+        subjImpf1:["iera","ieras","iera","iéramos","ieran"], subjImpf2:["iese","ieses","iese","iésemos","iesen"],
+        ger:"iendo", part:"ido" }
+};
+
+function fixOrtho(stem, ending, type, infinitive){
+  const first = ending[0];
+  const isE = (first==='e' || first==='é');
+  if(type==='ar' && isE){
+    if(/qu$/.test(stem)) return stem+ending;
+    if(/c$/.test(stem)) return stem.slice(0,-1)+'qu'+ending;
+    if(/gu$/.test(stem)) return stem.slice(0,-2)+'gü'+ending;
+    if(/g$/.test(stem)) return stem.slice(0,-1)+'gu'+ending;
+    if(/z$/.test(stem)) return stem.slice(0,-1)+'c'+ending;
+  }
+  if((type==='er'||type==='ir') && (first==='a'||first==='o')){
+    if(/g$/.test(stem) && /(ger|gir)$/.test(infinitive)) return stem.slice(0,-1)+'j'+ending;
+    if(/gu$/.test(stem) && /guir$/.test(infinitive)) return stem.slice(0,-2)+'g'+ending;
+  }
+  return stem+ending;
+}
+
+function applyStemChange(stem, personIdx, changeType){
+  if(personIdx===3) return stem;
+  const map = { ie:{'e':'ie'}, ue:{'o':'ue'}, ue_u:{'u':'ue'}, i:{'e':'i'} };
+  const rules = map[changeType];
+  if(!rules) return stem;
+  for(const k in rules){
+    const idx = stem.lastIndexOf(k);
+    if(idx>=0) return stem.slice(0,idx)+rules[k]+stem.slice(idx+k.length);
+  }
+  return stem;
+}
+function applySecondaryChange(stem, changeType){
+  const map = { i:{'e':'i'}, u:{'o':'u'} };
+  const rules = map[changeType];
+  if(!rules) return stem;
+  for(const k in rules){
+    const idx = stem.lastIndexOf(k);
+    if(idx>=0) return stem.slice(0,idx)+rules[k]+stem.slice(idx+k.length);
+  }
+  return stem;
+}
+
+function conjugateRegular(infinitive, over){
+  over = over || {};
+  let type = infinitive.slice(-2);
+  if(type==='ár') type='ar'; if(type==='ér') type='er'; if(type==='ír') type='ir';
+  const stem = infinitive.slice(0,-2);
+  const R = REG[type];
+  const out = {};
+
+  out.pres = [0,1,2,3,4].map(i=>{
+    if(i===0 && over.yo) return over.yo;
+    let s = stem;
+    if(over.stemChange) s = applyStemChange(s, i, over.stemChange);
+    return fixOrtho(s, R.pres[i], type, infinitive);
+  });
+
+  out.impf = [0,1,2,3,4].map(i => stem+R.impf[i]);
+
+  if(over.preteriteStem){
+    const pstem = over.preteriteStem;
+    const strongEnd = over.preteriteEndAlt ? ["e","iste","o","imos","eron"] : ["e","iste","o","imos","ieron"];
+    out.pret = [0,1,2,3,4].map(i=>{
+      if(i===2 && /c$/.test(pstem)) return pstem.slice(0,-1)+'z'+strongEnd[i];
+      return pstem+strongEnd[i];
+    });
+  } else {
+    out.pret = [0,1,2,3,4].map(i=>{
+      let s = stem;
+      if(over.secondaryChange && (i===2||i===4)) s = applySecondaryChange(s, over.secondaryChange);
+      return fixOrtho(s, R.pret[i], type, infinitive);
+    });
+  }
+
+  const futStem = over.futureStem || infinitive;
+  out.fut  = [0,1,2,3,4].map(i=> futStem+FUT_END[i]);
+  out.cond = [0,1,2,3,4].map(i=> futStem+COND_END[i]);
+
+  const yoBase = over.yo ? over.yo.replace(/o$/, '') : null;
+  out.subjPres = [0,1,2,3,4].map(i=>{
+    if(yoBase) return fixOrtho(yoBase, R.subjPres[i], type, infinitive);
+    let s = stem;
+    if(over.stemChange && i!==3) s = applyStemChange(s, i, over.stemChange);
+    else if(over.stemChange && i===3 && over.secondaryChange) s = applySecondaryChange(s, over.secondaryChange);
+    return fixOrtho(s, R.subjPres[i], type, infinitive);
+  });
+
+  if(over.preteriteStem){
+    const strongEnd4 = over.preteriteEndAlt ? "eron" : "ieron";
+    const base = out.pret[4].slice(0, out.pret[4].length - strongEnd4.length);
+    const e1 = over.preteriteEndAlt ? ["era","eras","era","éramos","eran"] : ["iera","ieras","iera","iéramos","ieran"];
+    const e2 = over.preteriteEndAlt ? ["ese","eses","ese","ésemos","esen"] : ["iese","ieses","iese","iésemos","iesen"];
+    out.subjImpf1 = [0,1,2,3,4].map(i=> base+e1[i]);
+    out.subjImpf2 = [0,1,2,3,4].map(i=> base+e2[i]);
+  } else {
+    let s = stem;
+    if(over.secondaryChange) s = applySecondaryChange(s, over.secondaryChange);
+    out.subjImpf1 = [0,1,2,3,4].map(i=> fixOrtho(s, R.subjImpf1[i], type, infinitive));
+    out.subjImpf2 = [0,1,2,3,4].map(i=> fixOrtho(s, R.subjImpf2[i], type, infinitive));
+  }
+
+  if(over.gerund) out.ger = over.gerund;
+  else {
+    let s = stem;
+    if(over.secondaryChange) s = applySecondaryChange(s, over.secondaryChange);
+    out.ger = s + R.ger;
+  }
+
+  out.part = over.participle || (stem + R.part);
+
+  out.impTu = over.impTu || out.pres[2];
+  out.impUsted = out.subjPres[2];
+  out.impNosotros = over.impNosotros || out.subjPres[3];
+  out.impUstedes = out.subjPres[4];
+
+  return out;
+}
+
+function applyUirPattern(table, infinitive){
+  const stem = infinitive.slice(0,-3);
+  table.pres = [stem+"uyo", stem+"uyes", stem+"uye", stem+"uimos", stem+"uyen"];
+  table.pret = [stem+"uí", stem+"uiste", stem+"uyó", stem+"uimos", stem+"uyeron"];
+  table.ger = stem+"uyendo";
+  table.subjPres = [stem+"uya", stem+"uyas", stem+"uya", stem+"uyamos", stem+"uyan"];
+  table.subjImpf1 = [stem+"uyera", stem+"uyeras", stem+"uyera", stem+"uyéramos", stem+"uyeran"];
+  table.subjImpf2 = [stem+"uyese", stem+"uyeses", stem+"uyese", stem+"uyésemos", stem+"uyesen"];
+  table.impTu = table.pres[2];
+  table.impUsted = table.subjPres[2];
+  table.impNosotros = table.subjPres[3];
+  table.impUstedes = table.subjPres[4];
+  return table;
+}
+function applyEerPattern(table, infinitive){
+  const stem = infinitive.slice(0,-3);
+  table.pret = [stem+"eí", stem+"eíste", stem+"eyó", stem+"eímos", stem+"eyeron"];
+  table.ger = stem+"eyendo";
+  table.subjImpf1 = [stem+"eyera", stem+"eyeras", stem+"eyera", stem+"eyéramos", stem+"eyeran"];
+  table.subjImpf2 = [stem+"eyese", stem+"eyeses", stem+"eyese", stem+"eyésemos", stem+"eyesen"];
+  table.part = stem+"eído";
+  return table;
+}
+
+/* =========================================================
+   BASE DE DATOS DE VERBOS
+   ========================================================= */
+
+// Verbos totalmente irregulares (tablas literales)
+const FULLY_IRREGULAR = {
+  ser: { pres:["soy","eres","es","somos","son"], impf:["era","eras","era","éramos","eran"],
+    pret:["fui","fuiste","fue","fuimos","fueron"], fut:["seré","serás","será","seremos","serán"],
+    cond:["sería","serías","sería","seríamos","serían"], subjPres:["sea","seas","sea","seamos","sean"],
+    subjImpf1:["fuera","fueras","fuera","fuéramos","fueran"], subjImpf2:["fuese","fueses","fuese","fuésemos","fuesen"],
+    ger:"siendo", part:"sido", impTu:"sé", impUsted:"sea", impNosotros:"seamos", impUstedes:"sean" },
+  estar: { pres:["estoy","estás","está","estamos","están"], impf:["estaba","estabas","estaba","estábamos","estaban"],
+    pret:["estuve","estuviste","estuvo","estuvimos","estuvieron"], fut:["estaré","estarás","estará","estaremos","estarán"],
+    cond:["estaría","estarías","estaría","estaríamos","estarían"], subjPres:["esté","estés","esté","estemos","estén"],
+    subjImpf1:["estuviera","estuvieras","estuviera","estuviéramos","estuvieran"], subjImpf2:["estuviese","estuvieses","estuviese","estuviésemos","estuviesen"],
+    ger:"estando", part:"estado", impTu:"está", impUsted:"esté", impNosotros:"estemos", impUstedes:"estén" },
+  ir: { pres:["voy","vas","va","vamos","van"], impf:["iba","ibas","iba","íbamos","iban"],
+    pret:["fui","fuiste","fue","fuimos","fueron"], fut:["iré","irás","irá","iremos","irán"],
+    cond:["iría","irías","iría","iríamos","irían"], subjPres:["vaya","vayas","vaya","vayamos","vayan"],
+    subjImpf1:["fuera","fueras","fuera","fuéramos","fueran"], subjImpf2:["fuese","fueses","fuese","fuésemos","fuesen"],
+    ger:"yendo", part:"ido", impTu:"ve", impUsted:"vaya", impNosotros:"vamos", impUstedes:"vayan" },
+  haber: { pres:["he","has","ha","hemos","han"], impf:["había","habías","había","habíamos","habían"],
+    pret:["hube","hubiste","hubo","hubimos","hubieron"], fut:["habré","habrás","habrá","habremos","habrán"],
+    cond:["habría","habrías","habría","habríamos","habrían"], subjPres:["haya","hayas","haya","hayamos","hayan"],
+    subjImpf1:["hubiera","hubieras","hubiera","hubiéramos","hubieran"], subjImpf2:["hubiese","hubieses","hubiese","hubiésemos","hubiesen"],
+    ger:"habiendo", part:"habido", impTu:"he", impUsted:"haya", impNosotros:"hayamos", impUstedes:"hayan" },
+  dar: { pres:["doy","das","da","damos","dan"], impf:["daba","dabas","daba","dábamos","daban"],
+    pret:["di","diste","dio","dimos","dieron"], fut:["daré","darás","dará","daremos","darán"],
+    cond:["daría","darías","daría","daríamos","darían"], subjPres:["dé","des","dé","demos","den"],
+    subjImpf1:["diera","dieras","diera","diéramos","dieran"], subjImpf2:["diese","dieses","diese","diésemos","diesen"],
+    ger:"dando", part:"dado", impTu:"da", impUsted:"dé", impNosotros:"demos", impUstedes:"den" },
+  ver: { pres:["veo","ves","ve","vemos","ven"], impf:["veía","veías","veía","veíamos","veían"],
+    pret:["vi","viste","vio","vimos","vieron"], fut:["veré","verás","verá","veremos","verán"],
+    cond:["vería","verías","vería","veríamos","verían"], subjPres:["vea","veas","vea","veamos","vean"],
+    subjImpf1:["viera","vieras","viera","viéramos","vieran"], subjImpf2:["viese","vieses","viese","viésemos","viesen"],
+    ger:"viendo", part:"visto", impTu:"ve", impUsted:"vea", impNosotros:"veamos", impUstedes:"vean" },
+  saber: { pres:["sé","sabes","sabe","sabemos","saben"], impf:["sabía","sabías","sabía","sabíamos","sabían"],
+    pret:["supe","supiste","supo","supimos","supieron"], fut:["sabré","sabrás","sabrá","sabremos","sabrán"],
+    cond:["sabría","sabrías","sabría","sabríamos","sabrían"], subjPres:["sepa","sepas","sepa","sepamos","sepan"],
+    subjImpf1:["supiera","supieras","supiera","supiéramos","supieran"], subjImpf2:["supiese","supieses","supiese","supiésemos","supiesen"],
+    ger:"sabiendo", part:"sabido", impTu:"sabe", impUsted:"sepa", impNosotros:"sepamos", impUstedes:"sepan" },
+  caber: { pres:["quepo","cabes","cabe","cabemos","caben"], impf:["cabía","cabías","cabía","cabíamos","cabían"],
+    pret:["cupe","cupiste","cupo","cupimos","cupieron"], fut:["cabré","cabrás","cabrá","cabremos","cabrán"],
+    cond:["cabría","cabrías","cabría","cabríamos","cabrían"], subjPres:["quepa","quepas","quepa","quepamos","quepan"],
+    subjImpf1:["cupiera","cupieras","cupiera","cupiéramos","cupieran"], subjImpf2:["cupiese","cupieses","cupiese","cupiésemos","cupiesen"],
+    ger:"cabiendo", part:"cabido", impTu:"cabe", impUsted:"quepa", impNosotros:"quepamos", impUstedes:"quepan" },
+  oír: { pres:["oigo","oyes","oye","oímos","oyen"], impf:["oía","oías","oía","oíamos","oían"],
+    pret:["oí","oíste","oyó","oímos","oyeron"], fut:["oiré","oirás","oirá","oiremos","oirán"],
+    cond:["oiría","oirías","oiría","oiríamos","oirían"], subjPres:["oiga","oigas","oiga","oigamos","oigan"],
+    subjImpf1:["oyera","oyeras","oyera","oyéramos","oyeran"], subjImpf2:["oyese","oyeses","oyese","oyésemos","oyesen"],
+    ger:"oyendo", part:"oído", impTu:"oye", impUsted:"oiga", impNosotros:"oigamos", impUstedes:"oigan" },
+  caer: { pres:["caigo","caes","cae","caemos","caen"], impf:["caía","caías","caía","caíamos","caían"],
+    pret:["caí","caíste","cayó","caímos","cayeron"], fut:["caeré","caerás","caerá","caeremos","caerán"],
+    cond:["caería","caerías","caería","caeríamos","caerían"], subjPres:["caiga","caigas","caiga","caigamos","caigan"],
+    subjImpf1:["cayera","cayeras","cayera","cayéramos","cayeran"], subjImpf2:["cayese","cayeses","cayese","cayésemos","cayesen"],
+    ger:"cayendo", part:"caído", impTu:"cae", impUsted:"caiga", impNosotros:"caigamos", impUstedes:"caigan" },
+  reír: { pres:["río","ríes","ríe","reímos","ríen"], impf:["reía","reías","reía","reíamos","reían"],
+    pret:["reí","reíste","rio","reímos","rieron"], fut:["reiré","reirás","reirá","reiremos","reirán"],
+    cond:["reiría","reirías","reiría","reiríamos","reirían"], subjPres:["ría","rías","ría","riamos","rían"],
+    subjImpf1:["riera","rieras","riera","riéramos","rieran"], subjImpf2:["riese","rieses","riese","riésemos","riesen"],
+    ger:"riendo", part:"reído", impTu:"ríe", impUsted:"ría", impNosotros:"riamos", impUstedes:"rían" },
+  sonreír: { pres:["sonrío","sonríes","sonríe","sonreímos","sonríen"], impf:["sonreía","sonreías","sonreía","sonreíamos","sonreían"],
+    pret:["sonreí","sonreíste","sonrió","sonreímos","sonrieron"], fut:["sonreiré","sonreirás","sonreirá","sonreiremos","sonreirán"],
+    cond:["sonreiría","sonreirías","sonreiría","sonreiríamos","sonreirían"], subjPres:["sonría","sonrías","sonría","sonriamos","sonrían"],
+    subjImpf1:["sonriera","sonrieras","sonriera","sonriéramos","sonrieran"], subjImpf2:["sonriese","sonrieses","sonriese","sonriésemos","sonriesen"],
+    ger:"sonriendo", part:"sonreído", impTu:"sonríe", impUsted:"sonría", impNosotros:"sonriamos", impUstedes:"sonrían" },
+  freír: { pres:["frío","fríes","fríe","freímos","fríen"], impf:["freía","freías","freía","freíamos","freían"],
+    pret:["freí","freíste","frio","freímos","frieron"], fut:["freiré","freirás","freirá","freiremos","freirán"],
+    cond:["freiría","freirías","freiría","freiríamos","freirían"], subjPres:["fría","frías","fría","friamos","frían"],
+    subjImpf1:["friera","frieras","friera","friéramos","frieran"], subjImpf2:["friese","frieses","friese","friésemos","friesen"],
+    ger:"friendo", part:"frito", impTu:"fríe", impUsted:"fría", impNosotros:"friamos", impUstedes:"frían" },
+  jugar: { pres:["juego","juegas","juega","jugamos","juegan"], impf:["jugaba","jugabas","jugaba","jugábamos","jugaban"],
+    pret:["jugué","jugaste","jugó","jugamos","jugaron"], fut:["jugaré","jugarás","jugará","jugaremos","jugarán"],
+    cond:["jugaría","jugarías","jugaría","jugaríamos","jugarían"], subjPres:["juegue","juegues","juegue","juguemos","jueguen"],
+    subjImpf1:["jugara","jugaras","jugara","jugáramos","jugaran"], subjImpf2:["jugase","jugases","jugase","jugásemos","jugasen"],
+    ger:"jugando", part:"jugado", impTu:"juega", impUsted:"juegue", impNosotros:"juguemos", impUstedes:"jueguen" }
+};
+
+// Verbos irregulares construidos con el motor + "overrides"
+const PATTERN_IRREGULAR = {
+  tener:   {stemChange:'ie', yo:'tengo', preteriteStem:'tuv', futureStem:'tendr', impTu:'ten'},
+  venir:   {stemChange:'ie', yo:'vengo', preteriteStem:'vin', futureStem:'vendr', gerund:'viniendo', impTu:'ven'},
+  poner:   {yo:'pongo', preteriteStem:'pus', futureStem:'pondr', participle:'puesto', impTu:'pon'},
+  salir:   {yo:'salgo', futureStem:'saldr', impTu:'sal'},
+  valer:   {yo:'valgo', futureStem:'valdr'},
+  poder:   {stemChange:'ue', preteriteStem:'pud', futureStem:'podr', gerund:'pudiendo'},
+  querer:  {stemChange:'ie', preteriteStem:'quis', futureStem:'querr'},
+  hacer:   {yo:'hago', preteriteStem:'hic', futureStem:'har', participle:'hecho', impTu:'haz'},
+  decir:   {stemChange:'i', secondaryChange:'i', yo:'digo', preteriteStem:'dij', preteriteEndAlt:true, futureStem:'dir', participle:'dicho', gerund:'diciendo', impTu:'di'},
+  traer:   {yo:'traigo', preteriteStem:'traj', preteriteEndAlt:true, gerund:'trayendo', participle:'traído'},
+  conocer: {yo:'conozco'},
+  parecer: {yo:'parezco'},
+  crecer:  {yo:'crezco'},
+  nacer:   {yo:'nazco'},
+  conducir:{yo:'conduzco', preteriteStem:'conduj', preteriteEndAlt:true},
+  producir:{yo:'produzco', preteriteStem:'produj', preteriteEndAlt:true},
+  traducir:{yo:'traduzco', preteriteStem:'traduj', preteriteEndAlt:true},
+  pensar:  {stemChange:'ie'},
+  cerrar:  {stemChange:'ie'},
+  empezar: {stemChange:'ie'},
+  comenzar:{stemChange:'ie'},
+  despertar:{stemChange:'ie'},
+  entender:{stemChange:'ie'},
+  perder:  {stemChange:'ie'},
+  sentir:  {stemChange:'ie', secondaryChange:'i'},
+  mentir:  {stemChange:'ie', secondaryChange:'i'},
+  preferir:{stemChange:'ie', secondaryChange:'i'},
+  divertir:{stemChange:'ie', secondaryChange:'i'},
+  contar:  {stemChange:'ue'},
+  encontrar:{stemChange:'ue'},
+  recordar:{stemChange:'ue'},
+  mostrar: {stemChange:'ue'},
+  volar:   {stemChange:'ue'},
+  costar:  {stemChange:'ue'},
+  acostar: {stemChange:'ue'},
+  probar:  {stemChange:'ue'},
+  volver:  {stemChange:'ue', participle:'vuelto'},
+  devolver:{stemChange:'ue', participle:'devuelto'},
+  envolver:{stemChange:'ue', participle:'envuelto'},
+  resolver:{stemChange:'ue', participle:'resuelto'},
+  dormir:  {stemChange:'ue', secondaryChange:'u'},
+  morir:   {stemChange:'ue', secondaryChange:'u', participle:'muerto'},
+  pedir:   {stemChange:'i', secondaryChange:'i'},
+  servir:  {stemChange:'i', secondaryChange:'i'},
+  seguir:  {stemChange:'i', secondaryChange:'i'},
+  conseguir:{stemChange:'i', secondaryChange:'i'},
+  repetir: {stemChange:'i', secondaryChange:'i'},
+  medir:   {stemChange:'i', secondaryChange:'i'},
+  vestir:  {stemChange:'i', secondaryChange:'i'},
+  competir:{stemChange:'i', secondaryChange:'i'},
+  elegir:  {stemChange:'i', secondaryChange:'i'},
+  corregir:{stemChange:'i', secondaryChange:'i'},
+  escribir:{participle:'escrito'},
+  describir:{participle:'descrito'},
+  abrir:   {participle:'abierto'},
+  cubrir:  {participle:'cubierto'},
+  descubrir:{participle:'descubierto'},
+  romper:  {participle:'roto'},
+  imprimir:{participle:'impreso'},
+  satisfacer:{yo:'satisfago', preteriteStem:'satisfic', futureStem:'satisfar', participle:'satisfecho', impTu:'satisfaz'}
+};
+
+// Patrones "uir" y "eer" (se aplican por terminación, sin necesidad de listar cada verbo)
+const UIR_VERBS = ["construir","destruir","huir","incluir","concluir","contribuir","disminuir","distribuir","sustituir","atribuir","excluir"];
+const EER_VERBS = ["leer","creer","poseer","releer"];
+
+// Lista de verbos regulares comunes (para sugerencias / chips)
+const REGULAR_VERBS = ["hablar","trabajar","estudiar","caminar","comprar","bailar","cocinar","limpiar",
+  "escuchar","mirar","necesitar","ayudar","cambiar","llamar","preguntar","esperar","usar","viajar","ganar",
+  "tocar","buscar","sacar","pagar","llegar","practicar","explicar","comer","beber","aprender","comprender",
+  "correr","deber","vender","responder","vivir","decidir","permitir","recibir","subir","compartir","existir","asistir"];
+
+const ALL_VERB_LIST = [...new Set([
+  ...REGULAR_VERBS,
+  ...Object.keys(PATTERN_IRREGULAR),
+  ...Object.keys(FULLY_IRREGULAR),
+  ...UIR_VERBS, ...EER_VERBS
+])].sort();
+
+function normalizeVerb(s){
+  return s.toLowerCase()
+    .replace(/[áà]/g,'a').replace(/[éè]/g,'e').replace(/[íì]/g,'i')
+    .replace(/[óò]/g,'o').replace(/[úùü]/g,'u');
+}
+const NORMALIZED_INDEX = {};
+ALL_VERB_LIST.forEach(v=>{ NORMALIZED_INDEX[normalizeVerb(v)] = v; });
+
+// Traducciones del infinitivo a los idiomas más comunes entre estudiantes de español
+const TRANSLATIONS = {
+  hablar:{en:"to speak",fr:"parler",pt:"falar",de:"sprechen",it:"parlare"},
+  trabajar:{en:"to work",fr:"travailler",pt:"trabalhar",de:"arbeiten",it:"lavorare"},
+  estudiar:{en:"to study",fr:"étudier",pt:"estudar",de:"lernen",it:"studiare"},
+  caminar:{en:"to walk",fr:"marcher",pt:"caminhar",de:"gehen",it:"camminare"},
+  comprar:{en:"to buy",fr:"acheter",pt:"comprar",de:"kaufen",it:"comprare"},
+  bailar:{en:"to dance",fr:"danser",pt:"dançar",de:"tanzen",it:"ballare"},
+  cocinar:{en:"to cook",fr:"cuisiner",pt:"cozinhar",de:"kochen",it:"cucinare"},
+  limpiar:{en:"to clean",fr:"nettoyer",pt:"limpar",de:"putzen",it:"pulire"},
+  escuchar:{en:"to listen",fr:"écouter",pt:"escutar",de:"hören",it:"ascoltare"},
+  mirar:{en:"to look / watch",fr:"regarder",pt:"olhar",de:"schauen",it:"guardare"},
+  necesitar:{en:"to need",fr:"avoir besoin de",pt:"precisar",de:"brauchen",it:"avere bisogno di"},
+  ayudar:{en:"to help",fr:"aider",pt:"ajudar",de:"helfen",it:"aiutare"},
+  cambiar:{en:"to change",fr:"changer",pt:"mudar",de:"ändern",it:"cambiare"},
+  llamar:{en:"to call",fr:"appeler",pt:"chamar",de:"rufen",it:"chiamare"},
+  preguntar:{en:"to ask",fr:"demander",pt:"perguntar",de:"fragen",it:"chiedere"},
+  esperar:{en:"to wait / hope",fr:"attendre",pt:"esperar",de:"warten",it:"aspettare"},
+  usar:{en:"to use",fr:"utiliser",pt:"usar",de:"benutzen",it:"usare"},
+  viajar:{en:"to travel",fr:"voyager",pt:"viajar",de:"reisen",it:"viaggiare"},
+  ganar:{en:"to win / earn",fr:"gagner",pt:"ganhar",de:"gewinnen",it:"guadagnare"},
+  tocar:{en:"to touch / play",fr:"toucher",pt:"tocar",de:"berühren",it:"toccare"},
+  buscar:{en:"to look for",fr:"chercher",pt:"procurar",de:"suchen",it:"cercare"},
+  sacar:{en:"to take out",fr:"sortir qc.",pt:"tirar",de:"herausnehmen",it:"tirare fuori"},
+  pagar:{en:"to pay",fr:"payer",pt:"pagar",de:"bezahlen",it:"pagare"},
+  llegar:{en:"to arrive",fr:"arriver",pt:"chegar",de:"ankommen",it:"arrivare"},
+  practicar:{en:"to practice",fr:"pratiquer",pt:"praticar",de:"üben",it:"praticare"},
+  explicar:{en:"to explain",fr:"expliquer",pt:"explicar",de:"erklären",it:"spiegare"},
+  comer:{en:"to eat",fr:"manger",pt:"comer",de:"essen",it:"mangiare"},
+  beber:{en:"to drink",fr:"boire",pt:"beber",de:"trinken",it:"bere"},
+  aprender:{en:"to learn",fr:"apprendre",pt:"aprender",de:"lernen",it:"imparare"},
+  comprender:{en:"to understand",fr:"comprendre",pt:"compreender",de:"verstehen",it:"capire"},
+  correr:{en:"to run",fr:"courir",pt:"correr",de:"rennen",it:"correre"},
+  deber:{en:"must / to owe",fr:"devoir",pt:"dever",de:"sollen",it:"dovere"},
+  vender:{en:"to sell",fr:"vendre",pt:"vender",de:"verkaufen",it:"vendere"},
+  responder:{en:"to answer",fr:"répondre",pt:"responder",de:"antworten",it:"rispondere"},
+  vivir:{en:"to live",fr:"vivre",pt:"viver",de:"leben",it:"vivere"},
+  decidir:{en:"to decide",fr:"décider",pt:"decidir",de:"entscheiden",it:"decidere"},
+  permitir:{en:"to allow",fr:"permettre",pt:"permitir",de:"erlauben",it:"permettere"},
+  recibir:{en:"to receive",fr:"recevoir",pt:"receber",de:"bekommen",it:"ricevere"},
+  subir:{en:"to go up",fr:"monter",pt:"subir",de:"steigen",it:"salire"},
+  compartir:{en:"to share",fr:"partager",pt:"compartilhar",de:"teilen",it:"condividere"},
+  existir:{en:"to exist",fr:"exister",pt:"existir",de:"existieren",it:"esistere"},
+  asistir:{en:"to attend",fr:"assister",pt:"assistir",de:"teilnehmen",it:"assistere"},
+  tener:{en:"to have",fr:"avoir",pt:"ter",de:"haben",it:"avere"},
+  venir:{en:"to come",fr:"venir",pt:"vir",de:"kommen",it:"venire"},
+  poner:{en:"to put",fr:"mettre",pt:"pôr",de:"stellen / legen",it:"mettere"},
+  salir:{en:"to leave / go out",fr:"sortir",pt:"sair",de:"ausgehen",it:"uscire"},
+  valer:{en:"to be worth",fr:"valoir",pt:"valer",de:"wert sein",it:"valere"},
+  poder:{en:"can / to be able to",fr:"pouvoir",pt:"poder",de:"können",it:"potere"},
+  querer:{en:"to want / love",fr:"vouloir",pt:"querer",de:"wollen",it:"volere"},
+  hacer:{en:"to do / make",fr:"faire",pt:"fazer",de:"machen",it:"fare"},
+  decir:{en:"to say / tell",fr:"dire",pt:"dizer",de:"sagen",it:"dire"},
+  traer:{en:"to bring",fr:"apporter",pt:"trazer",de:"bringen",it:"portare"},
+  conocer:{en:"to know (be familiar with)",fr:"connaître",pt:"conhecer",de:"kennen",it:"conoscere"},
+  parecer:{en:"to seem",fr:"paraître",pt:"parecer",de:"scheinen",it:"sembrare"},
+  crecer:{en:"to grow",fr:"grandir",pt:"crescer",de:"wachsen",it:"crescere"},
+  nacer:{en:"to be born",fr:"naître",pt:"nascer",de:"geboren werden",it:"nascere"},
+  conducir:{en:"to drive",fr:"conduire",pt:"dirigir",de:"fahren",it:"guidare"},
+  producir:{en:"to produce",fr:"produire",pt:"produzir",de:"produzieren",it:"produrre"},
+  traducir:{en:"to translate",fr:"traduire",pt:"traduzir",de:"übersetzen",it:"tradurre"},
+  pensar:{en:"to think",fr:"penser",pt:"pensar",de:"denken",it:"pensare"},
+  cerrar:{en:"to close",fr:"fermer",pt:"fechar",de:"schließen",it:"chiudere"},
+  empezar:{en:"to start",fr:"commencer",pt:"começar",de:"anfangen",it:"iniziare"},
+  comenzar:{en:"to begin",fr:"commencer",pt:"começar",de:"beginnen",it:"cominciare"},
+  despertar:{en:"to wake up",fr:"réveiller",pt:"acordar",de:"aufwachen",it:"svegliare"},
+  entender:{en:"to understand",fr:"comprendre",pt:"entender",de:"verstehen",it:"capire"},
+  perder:{en:"to lose",fr:"perdre",pt:"perder",de:"verlieren",it:"perdere"},
+  sentir:{en:"to feel",fr:"sentir",pt:"sentir",de:"fühlen",it:"sentire"},
+  mentir:{en:"to lie",fr:"mentir",pt:"mentir",de:"lügen",it:"mentire"},
+  preferir:{en:"to prefer",fr:"préférer",pt:"preferir",de:"bevorzugen",it:"preferire"},
+  divertir:{en:"to entertain",fr:"amuser",pt:"divertir",de:"unterhalten",it:"divertire"},
+  contar:{en:"to count / tell",fr:"compter",pt:"contar",de:"zählen",it:"contare"},
+  encontrar:{en:"to find",fr:"trouver",pt:"encontrar",de:"finden",it:"trovare"},
+  recordar:{en:"to remember",fr:"se souvenir",pt:"lembrar",de:"sich erinnern",it:"ricordare"},
+  mostrar:{en:"to show",fr:"montrer",pt:"mostrar",de:"zeigen",it:"mostrare"},
+  volar:{en:"to fly",fr:"voler",pt:"voar",de:"fliegen",it:"volare"},
+  costar:{en:"to cost",fr:"coûter",pt:"custar",de:"kosten",it:"costare"},
+  acostar:{en:"to put to bed",fr:"coucher",pt:"deitar",de:"hinlegen",it:"coricare"},
+  probar:{en:"to try / taste",fr:"essayer",pt:"provar",de:"probieren",it:"provare"},
+  volver:{en:"to return",fr:"revenir",pt:"voltar",de:"zurückkehren",it:"tornare"},
+  devolver:{en:"to give back",fr:"rendre",pt:"devolver",de:"zurückgeben",it:"restituire"},
+  envolver:{en:"to wrap",fr:"envelopper",pt:"envolver",de:"einwickeln",it:"avvolgere"},
+  resolver:{en:"to solve",fr:"résoudre",pt:"resolver",de:"lösen",it:"risolvere"},
+  dormir:{en:"to sleep",fr:"dormir",pt:"dormir",de:"schlafen",it:"dormire"},
+  morir:{en:"to die",fr:"mourir",pt:"morrer",de:"sterben",it:"morire"},
+  pedir:{en:"to ask for / order",fr:"demander",pt:"pedir",de:"bitten",it:"chiedere"},
+  servir:{en:"to serve",fr:"servir",pt:"servir",de:"servieren",it:"servire"},
+  seguir:{en:"to follow / continue",fr:"suivre",pt:"seguir",de:"folgen",it:"seguire"},
+  conseguir:{en:"to get / achieve",fr:"obtenir",pt:"conseguir",de:"bekommen",it:"ottenere"},
+  repetir:{en:"to repeat",fr:"répéter",pt:"repetir",de:"wiederholen",it:"ripetere"},
+  medir:{en:"to measure",fr:"mesurer",pt:"medir",de:"messen",it:"misurare"},
+  vestir:{en:"to dress",fr:"habiller",pt:"vestir",de:"anziehen",it:"vestire"},
+  competir:{en:"to compete",fr:"concourir",pt:"competir",de:"konkurrieren",it:"competere"},
+  elegir:{en:"to choose",fr:"choisir",pt:"escolher",de:"wählen",it:"scegliere"},
+  corregir:{en:"to correct",fr:"corriger",pt:"corrigir",de:"korrigieren",it:"correggere"},
+  escribir:{en:"to write",fr:"écrire",pt:"escrever",de:"schreiben",it:"scrivere"},
+  describir:{en:"to describe",fr:"décrire",pt:"descrever",de:"beschreiben",it:"descrivere"},
+  abrir:{en:"to open",fr:"ouvrir",pt:"abrir",de:"öffnen",it:"aprire"},
+  cubrir:{en:"to cover",fr:"couvrir",pt:"cobrir",de:"bedecken",it:"coprire"},
+  descubrir:{en:"to discover",fr:"découvrir",pt:"descobrir",de:"entdecken",it:"scoprire"},
+  romper:{en:"to break",fr:"casser",pt:"quebrar",de:"brechen",it:"rompere"},
+  imprimir:{en:"to print",fr:"imprimer",pt:"imprimir",de:"drucken",it:"stampare"},
+  satisfacer:{en:"to satisfy",fr:"satisfaire",pt:"satisfazer",de:"befriedigen",it:"soddisfare"},
+  ser:{en:"to be",fr:"être",pt:"ser",de:"sein",it:"essere"},
+  estar:{en:"to be (state/location)",fr:"être",pt:"estar",de:"sich befinden",it:"stare"},
+  ir:{en:"to go",fr:"aller",pt:"ir",de:"gehen",it:"andare"},
+  haber:{en:"to have (auxiliary) / there to be",fr:"avoir",pt:"haver",de:"haben",it:"avere / esserci"},
+  dar:{en:"to give",fr:"donner",pt:"dar",de:"geben",it:"dare"},
+  ver:{en:"to see",fr:"voir",pt:"ver",de:"sehen",it:"vedere"},
+  saber:{en:"to know (a fact)",fr:"savoir",pt:"saber",de:"wissen",it:"sapere"},
+  caber:{en:"to fit",fr:"tenir (dans)",pt:"caber",de:"passen",it:"starci"},
+  oír:{en:"to hear",fr:"entendre",pt:"ouvir",de:"hören",it:"udire"},
+  caer:{en:"to fall",fr:"tomber",pt:"cair",de:"fallen",it:"cadere"},
+  reír:{en:"to laugh",fr:"rire",pt:"rir",de:"lachen",it:"ridere"},
+  sonreír:{en:"to smile",fr:"sourire",pt:"sorrir",de:"lächeln",it:"sorridere"},
+  freír:{en:"to fry",fr:"frire",pt:"fritar",de:"frittieren",it:"friggere"},
+  jugar:{en:"to play",fr:"jouer",pt:"jogar",de:"spielen",it:"giocare"},
+  construir:{en:"to build",fr:"construire",pt:"construir",de:"bauen",it:"costruire"},
+  destruir:{en:"to destroy",fr:"détruire",pt:"destruir",de:"zerstören",it:"distruggere"},
+  huir:{en:"to flee",fr:"fuir",pt:"fugir",de:"fliehen",it:"fuggire"},
+  incluir:{en:"to include",fr:"inclure",pt:"incluir",de:"einschließen",it:"includere"},
+  concluir:{en:"to conclude",fr:"conclure",pt:"concluir",de:"abschließen",it:"concludere"},
+  contribuir:{en:"to contribute",fr:"contribuer",pt:"contribuir",de:"beitragen",it:"contribuire"},
+  disminuir:{en:"to decrease",fr:"diminuer",pt:"diminuir",de:"verringern",it:"diminuire"},
+  distribuir:{en:"to distribute",fr:"distribuer",pt:"distribuir",de:"verteilen",it:"distribuire"},
+  sustituir:{en:"to substitute",fr:"substituer",pt:"substituir",de:"ersetzen",it:"sostituire"},
+  atribuir:{en:"to attribute",fr:"attribuer",pt:"atribuir",de:"zuschreiben",it:"attribuire"},
+  excluir:{en:"to exclude",fr:"exclure",pt:"excluir",de:"ausschließen",it:"escludere"},
+  leer:{en:"to read",fr:"lire",pt:"ler",de:"lesen",it:"leggere"},
+  creer:{en:"to believe",fr:"croire",pt:"acreditar",de:"glauben",it:"credere"},
+  poseer:{en:"to possess",fr:"posséder",pt:"possuir",de:"besitzen",it:"possedere"},
+  releer:{en:"to reread",fr:"relire",pt:"reler",de:"noch einmal lesen",it:"rileggere"}
+};
+const LANG_LABELS = {en:"EN",fr:"FR",pt:"PT",de:"DE",it:"IT"};
+
+function addCompoundTenses(table){
+  const H = FULLY_IRREGULAR.haber;
+  table.presPerf      = H.pres.map(f=> f+" "+table.part);
+  table.pluscuam       = H.impf.map(f=> f+" "+table.part);
+  table.futComp        = H.fut.map(f=> f+" "+table.part);
+  table.condComp       = H.cond.map(f=> f+" "+table.part);
+  table.subjPerf        = H.subjPres.map(f=> f+" "+table.part);
+  table.subjPluscuam1   = H.subjImpf1.map(f=> f+" "+table.part);
+  table.subjPluscuam2   = H.subjImpf2.map(f=> f+" "+table.part);
+  return table;
+}
+
+// Compara una forma real contra su equivalente "regular" hipotética y envuelve
+// en <mark> la parte que cambia, para resaltar visualmente la irregularidad.
+function diffHighlight(actual, baseline){
+  if(!baseline || actual===baseline) return actual;
+  const minLen = Math.min(actual.length, baseline.length);
+  let i=0;
+  while(i<minLen && actual[i]===baseline[i]) i++;
+  let j=0;
+  while(j<(minLen-i) && actual[actual.length-1-j]===baseline[baseline.length-1-j]) j++;
+  const prefix = actual.slice(0,i);
+  const middle = actual.slice(i, actual.length-j);
+  const suffix = actual.slice(actual.length-j);
+  if(!middle) return actual;
+  return `${prefix}<mark>${middle}</mark>${suffix}`;
+}
+
+function conjugate(infinitive){
+  infinitive = infinitive.trim().toLowerCase();
+  // Si el verbo (con o sin acentos) coincide con uno conocido (ej. "oir" -> "oír"), usar su forma correcta
+  const canon = NORMALIZED_INDEX[normalizeVerb(infinitive)];
+  if(canon) infinitive = canon;
+  if(!/^[a-záéíóúñü]*(ar|ár|er|ér|ir|ír)$/.test(infinitive) || infinitive.length<2) return null;
+
+  let table, isIrregular = false;
+
+  if(FULLY_IRREGULAR[infinitive]){
+    table = FULLY_IRREGULAR[infinitive];
+    isIrregular = true;
+  } else if(PATTERN_IRREGULAR[infinitive]){
+    table = conjugateRegular(infinitive, PATTERN_IRREGULAR[infinitive]);
+    isIrregular = true;
+  } else if(UIR_VERBS.includes(infinitive)){
+    table = applyUirPattern(conjugateRegular(infinitive, {}), infinitive);
+    isIrregular = true;
+  } else if(EER_VERBS.includes(infinitive)){
+    table = applyEerPattern(conjugateRegular(infinitive, {}), infinitive);
+    isIrregular = true;
+  } else {
+    table = conjugateRegular(infinitive, {});
+  }
+
+  addCompoundTenses(table);
+
+  // Tabla "si fuera regular" (solo para verbos irregulares), usada para resaltar
+  // qué parte de cada forma es la irregularidad.
+  let baseline = null;
+  if(isIrregular){
+    baseline = addCompoundTenses(conjugateRegular(infinitive, {}));
+  }
+
+  const translation = TRANSLATIONS[infinitive] || null;
+
+  return { infinitive, table, isIrregular, baseline, translation };
+}
+
+/* =========================================================
+   INTERFAZ
+   ========================================================= */
+const PERSONS = ["yo","tú","él / ella / usted","nosotros","ellos / ustedes"];
+
+const TENSE_GROUPS = [
+  { title:"Indicativo", items:[
+    {k:"pres", label:"Presente"},
+    {k:"impf", label:"Pretérito imperfecto"},
+    {k:"pret", label:"Pretérito indefinido"},
+    {k:"fut", label:"Futuro simple"},
+    {k:"cond", label:"Condicional simple"},
+    {k:"presPerf", label:"Pretérito perfecto"},
+    {k:"pluscuam", label:"Pretérito pluscuamperfecto"},
+    {k:"futComp", label:"Futuro compuesto"},
+    {k:"condComp", label:"Condicional compuesto"},
+  ]},
+  { title:"Subjuntivo", items:[
+    {k:"subjPres", label:"Presente"},
+    {k:"subjImpf", label:"Pretérito imperfecto"},
+    {k:"subjPerf", label:"Pretérito perfecto"},
+    {k:"subjPluscuam", label:"Pretérito pluscuamperfecto"},
+  ]}
+];
+
+let copyPayloadStore = {};
+let copyPayloadId = 0;
+
+function renderTenseCard(label, forms, baselineForms, plainForCopy, extraClass){
+  const id = 'cp' + (copyPayloadId++);
+  copyPayloadStore[id] = `${label}\n` + PERSONS.map((p,i)=> `${p}: ${plainForCopy[i]}`).join('\n');
+  const displayForms = forms.map((f,i)=> baselineForms ? diffHighlight(f, baselineForms[i]) : f);
+  return `<div class="tense-card ${extraClass||''}">
+    <div class="head">${label}<button type="button" class="copy-btn" data-copy="${id}">Copiar</button></div>
+    <div class="rows">
+      ${displayForms.map((f,i)=>`<div class="row"><span class="p">${PERSONS[i]}</span><span class="f">${f}</span></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function renderResult(data, compact){
+  const { infinitive, table, isIrregular, baseline, translation } = data;
+  let html = `<div class="verb-head">
+      <h2>${infinitive}</h2>
+      <span class="tag ${isIrregular?'irr':'reg'}">${isIrregular?'Irregular':'Regular'}</span>
+    </div>`;
+
+  if(translation){
+    html += `<div class="translations">` +
+      Object.keys(LANG_LABELS).map(lang=> translation[lang] ? `<span class="tr-pill"><b>${LANG_LABELS[lang]}</b>${translation[lang]}</span>` : '').join('') +
+      `</div>`;
+  }
+
+  html += `<div class="impersonal">
+      <div class="cell"><div class="k">Infinitivo</div><div class="v">${infinitive}</div></div>
+      <div class="cell"><div class="k">Gerundio</div><div class="v">${table.ger}</div></div>
+      <div class="cell"><div class="k">Participio</div><div class="v">${table.part}</div></div>
+    </div>`;
+
+  TENSE_GROUPS.forEach(group=>{
+    const groupClass = group.title === "Indicativo" ? "grp-indicativo" : "grp-subjuntivo";
+    html += `<div class="section-title ${groupClass}">${group.title}</div><div class="grid ${groupClass}">`;
+    group.items.forEach(item=>{
+      if(item.k==="subjImpf"){
+        const combined = table.subjImpf1.map((f,i)=> `${f} <span style="color:var(--text-faint); font-weight:400;">o</span> ${table.subjImpf2[i]}`);
+        const baseCombined = baseline ? baseline.subjImpf1.map((f,i)=> `${f} o ${baseline.subjImpf2[i]}`) : null;
+        const plain = table.subjImpf1.map((f,i)=> `${f} o ${table.subjImpf2[i]}`);
+        html += renderTenseCard(item.label, combined, baseCombined, plain);
+      } else if(item.k==="subjPluscuam"){
+        const combined = table.subjPluscuam1.map((f,i)=> `${f} <span style="color:var(--text-faint); font-weight:400;">o</span> ${table.subjPluscuam2[i]}`);
+        const baseCombined = baseline ? baseline.subjPluscuam1.map((f,i)=> `${f} o ${baseline.subjPluscuam2[i]}`) : null;
+        const plain = table.subjPluscuam1.map((f,i)=> `${f} o ${table.subjPluscuam2[i]}`);
+        html += renderTenseCard(item.label, combined, baseCombined, plain);
+      } else {
+        html += renderTenseCard(item.label, table[item.k], baseline ? baseline[item.k] : null, table[item.k]);
+      }
+    });
+    html += `</div>`;
+  });
+
+  // Imperativo
+  const impForms = [table.impTu, table.impUsted, table.impNosotros, table.impUstedes];
+  const impBase = baseline ? [baseline.impTu, baseline.impUsted, baseline.impNosotros, baseline.impUstedes] : null;
+  const impLabels = ["tú","usted","nosotros","ustedes"];
+  const impDisplay = impForms.map((f,i)=> impBase ? diffHighlight(f, impBase[i]) : f);
+  const id = 'cp' + (copyPayloadId++);
+  copyPayloadStore[id] = "Imperativo\n" + impLabels.map((p,i)=> `${p}: ${impForms[i]}`).join('\n');
+
+  html += `<div class="section-title grp-imperativo">Imperativo</div>
+    <div class="grid grp-imperativo">
+      <div class="tense-card imperativo">
+        <div class="head">Presente<button type="button" class="copy-btn" data-copy="${id}">Copiar</button></div>
+        <div class="rows">
+          ${impLabels.map((p,i)=>`<div class="row"><span class="p">${p}</span><span class="f">${impDisplay[i]}</span></div>`).join("")}
+        </div>
+      </div>
+    </div>`;
+
+  return html;
+}
+
+const searchForm = document.getElementById('searchForm');
+const searchInput = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('suggestions');
+const resultEl = document.getElementById('result');
+const errorEl = document.getElementById('errorMsg');
+const chipsEl = document.getElementById('chips');
+const tenseFilterEl = document.getElementById('tenseFilter');
+const recentRowEl = document.getElementById('recentRow');
+const recentChipsEl = document.getElementById('recentChips');
+const compareToggle = document.getElementById('compareToggle');
+const compareForm = document.getElementById('compareForm');
+const compareInput = document.getElementById('compareInput');
+
+let recentVerbs = [];
+let compareModeOn = false;
+
+function showError(msg){
+  errorEl.textContent = msg;
+  errorEl.classList.add('show');
+  resultEl.innerHTML = '';
+  tenseFilterEl.style.display = 'none';
+}
+function hideError(){ errorEl.classList.remove('show'); }
+
+function addRecent(v){
+  recentVerbs = [v, ...recentVerbs.filter(x=>x!==v)].slice(0,6);
+  if(recentVerbs.length===0){ recentRowEl.style.display='none'; return; }
+  recentRowEl.style.display='flex';
+  recentChipsEl.innerHTML = recentVerbs.map(v=>`<span class="chip" data-verb="${v}">${v}</span>`).join('');
+}
+
+function doSearch(verb, opts){
+  opts = opts || {};
+  hideError();
+  suggestionsBox.classList.remove('show');
+  const v = (verb||'').trim().toLowerCase();
+  if(!v){ return; }
+  const data = conjugate(v);
+  if(!data){
+    showError(`No encontré el verbo "${v}". Prueba con un infinitivo terminado en -ar, -er o -ir, por ejemplo: hablar, comer, vivir, tener, pedir…`);
+    return;
+  }
+  resultEl.innerHTML = renderResult(data);
+  tenseFilterEl.style.display = 'flex';
+  applyTenseFilter(currentFilter);
+  addRecent(data.infinitive);
+  if(!opts.skipUrl) history.replaceState(null, '', '?verbo=' + encodeURIComponent(data.infinitive));
+  if(!opts.skipScroll) window.scrollTo({top: resultEl.offsetTop - 20, behavior:'smooth'});
+}
+
+searchForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  doSearch(searchInput.value);
+});
+
+searchInput.addEventListener('input', ()=>{
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){ suggestionsBox.classList.remove('show'); return; }
+  const matches = ALL_VERB_LIST.filter(v=> v.startsWith(q)).slice(0,8);
+  if(matches.length===0){ suggestionsBox.classList.remove('show'); return; }
+  suggestionsBox.innerHTML = matches.map(v=>{
+    const irr = FULLY_IRREGULAR[v] || PATTERN_IRREGULAR[v] || UIR_VERBS.includes(v) || EER_VERBS.includes(v);
+    return `<button type="button" data-verb="${v}">${v} <small>${irr?'irregular':'regular'}</small></button>`;
+  }).join('');
+  suggestionsBox.classList.add('show');
+});
+
+suggestionsBox.addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-verb]');
+  if(!btn) return;
+  searchInput.value = btn.dataset.verb;
+  doSearch(btn.dataset.verb);
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-box')) suggestionsBox.classList.remove('show');
+});
+
+// Chips de ejemplo
+const exampleVerbs = ["ser","estar","tener","hablar","pedir","dormir","hacer","ir","jugar","construir"];
+chipsEl.innerHTML = exampleVerbs.map(v=>`<span class="chip" data-verb="${v}">${v}</span>`).join('');
+chipsEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  searchInput.value = chip.dataset.verb;
+  doSearch(chip.dataset.verb);
+});
+recentChipsEl.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  searchInput.value = chip.dataset.verb;
+  doSearch(chip.dataset.verb);
+});
+
+// ---- Copiar tabla ----
+resultEl.addEventListener('click', e=>{
+  const btn = e.target.closest('.copy-btn');
+  if(!btn) return;
+  const text = copyPayloadStore[btn.dataset.copy] || '';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      const orig = btn.textContent;
+      btn.textContent = '¡Copiado!';
+      setTimeout(()=>{ btn.textContent = orig; }, 1200);
+    });
+  }
+});
+
+// ---- Filtro de tiempos ----
+let currentFilter = 'todos';
+function applyTenseFilter(filter){
+  currentFilter = filter;
+  const groups = resultEl.querySelectorAll('.grp-indicativo, .grp-subjuntivo, .grp-imperativo');
+  groups.forEach(el=>{
+    const isMatch =
+      filter==='todos' ||
+      (filter==='indicativo' && el.classList.contains('grp-indicativo')) ||
+      (filter==='subjuntivo' && el.classList.contains('grp-subjuntivo')) ||
+      (filter==='imperativo' && el.classList.contains('grp-imperativo'));
+    el.style.display = isMatch ? '' : 'none';
+  });
+}
+tenseFilterEl.addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-filter]');
+  if(!btn) return;
+  tenseFilterEl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyTenseFilter(btn.dataset.filter);
+});
+
+// ---- Comparar verbos ----
+compareToggle.addEventListener('click', ()=>{
+  compareModeOn = !compareModeOn;
+  compareForm.classList.toggle('show', compareModeOn);
+  compareToggle.textContent = compareModeOn ? '– Ocultar comparación' : '+ Comparar con otro verbo';
+  if(!compareModeOn && searchInput.value) doSearch(searchInput.value, {skipScroll:true});
+});
+compareForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  const vA = searchInput.value.trim().toLowerCase();
+  const vB = compareInput.value.trim().toLowerCase();
+  if(!vA || !vB) return;
+  const dataA = conjugate(vA);
+  const dataB = conjugate(vB);
+  if(!dataA || !dataB){
+    showError('No encontré uno de los dos verbos. Revisa que ambos terminen en -ar, -er o -ir.');
+    return;
+  }
+  hideError();
+  tenseFilterEl.style.display = 'none';
+  resultEl.innerHTML = `<div class="section-title" style="margin-top:34px;">Comparando "${dataA.infinitive}" vs "${dataB.infinitive}"</div>
+    <div class="compare-wrap">
+      <div class="verb-panel">${renderResult(dataA)}</div>
+      <div class="verb-panel">${renderResult(dataB)}</div>
+    </div>`;
+  addRecent(dataA.infinitive);
+  addRecent(dataB.infinitive);
+  window.scrollTo({top: resultEl.offsetTop - 20, behavior:'smooth'});
+});
+
+// Carga inicial: si hay ?verbo= en la URL, úsalo; si no, "ser"
+const urlParams = new URLSearchParams(window.location.search);
+const initialVerb = urlParams.get('verbo') || 'ser';
+searchInput.value = initialVerb;
+doSearch(initialVerb, {skipUrl:true, skipScroll:true});
+</script>
+</body>
+</html>
